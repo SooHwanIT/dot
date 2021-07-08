@@ -26,7 +26,6 @@ $('#image-opacity').on("change mousemove", function () {
     });
 });
 
-
 //캔버스 오퍼시티 | range와 css를 이어줌
 $('#canvas-opacity').on("change mousemove", function () {
     $('#slider-value').html($(this).val());
@@ -112,71 +111,90 @@ $("#btnScreenShot").on("click", function () {//스크린샷
 
 });
 
+$("#btnScreenShotB").on("click", function () {//스크린샷
 
-// $("#btnScreenShotB").on("click", function () {//스크린샷
+    html2canvas(document.querySelector("body")).then(function (canvas) {
 
-//     html2canvas(document.querySelector("#img div")).then(function (canvas) {
+        if (canvas.msToBlob) { //for IE 10, 11
 
-//         if (canvas.msToBlob) { //for IE 10, 11
+            var blob = canvas.msToBlob();
 
-//             var blob = canvas.msToBlob();
+            window.navigator.msSaveBlob(blob, "dot.png");
 
-//             window.navigator.msSaveBlob(blob, "dot.png");
+        } else {
 
-//         } else {
+            saveAs(canvas.toDataURL(), "dot.png");
 
-//             saveAs(canvas.toDataURL(), "dot.png");
-
-//         }
-
-
-
-//     });
-
-//     function saveAs(uri, filename) {
+        }
 
 
 
-//         var link = document.createElement('a');
+    });
+
+    function saveAs(uri, filename) {
 
 
 
-//         if (typeof link.download === 'string') {
+        var link = document.createElement('a');
 
 
-//             link.href = uri;
 
-//             link.download = filename;
-
-
-//             //Firefox requires the link to be in the body
-
-//             document.body.appendChild(link);
-
-//             //simulate click
-
-//             link.click();
-
-//             //remove the link when done
-
-//             document.body.removeChild(link);
-
-//         } else {
-
-//             window.open(uri);
-
-//         }
-
-//     }
-
-// });
+        if (typeof link.download === 'string') {
 
 
+            link.href = uri;
+
+            link.download = filename;
+
+
+            //Firefox requires the link to be in the body
+
+            document.body.appendChild(link);
+
+            //simulate click
+
+            link.click();
+
+            //remove the link when done
+
+            document.body.removeChild(link);
+
+        } else {
+
+            window.open(uri);
+
+        }
+
+    }
+
+});
+
+//캔버스 불러오기
+function CanvasLoadCanvas(file) {
+    var canvas = document.getElementById("canvas");
+    var background = document.createElement("div");
+
+    var reader = new FileReader();
+
+    reader.onload = function () {
+
+        canvas.innerHTML = reader.result;
+
+        document.getElementById("wsize").value = canvas.childNodes[0].childNodes[0].childNodes[0].childNodes.length;
+        document.getElementById("hsize").value = canvas.childNodes[0].childNodes[0].childNodes.length;
+        for(var i =0;i<canvas.childNodes[0].childNodes[0].childNodes.length;i++){
+            for(var j=0;j<canvas.childNodes[0].childNodes[0].childNodes[0].childNodes.length;j++){
+                var td = canvas.childNodes[0].childNodes[0].childNodes[i].childNodes[j];
+                AddEvent(td);
+            }
+        }
+    };
+    reader.readAsText(file, /* optional */ "euc-kr");
+
+
+}
 //도안 캔버스 로드
-
-
-
-function loadCanvas(file) {
+function backgroundCanvasLoadCanvas(file) {
     var backgroundCanvas = document.getElementsByClassName("backgroundCanvas");
     var canvas = document.getElementById("canvas");
     var background = document.createElement("div");
@@ -185,36 +203,44 @@ function loadCanvas(file) {
     background.setAttribute('id', "background");
     background.style.zIndex = -1;
 
-
     var reader = new FileReader();
 
     reader.onload = function () {
         background.innerHTML = reader.result;
 
-
-
-
         document.getElementById("wsize").value = background.childNodes[0].childNodes[0].childNodes[0].childNodes.length;
         document.getElementById("hsize").value = background.childNodes[0].childNodes[0].childNodes.length;
 
         CreateCanvas();
-
+        for(var i =0;i<background.childNodes[0].childNodes[0].childNodes.length;i++){
+            for(var j=0;j<background.childNodes[0].childNodes[0].childNodes[0].childNodes.length;j++){
+                var td = background.childNodes[0].childNodes[0].childNodes[i].childNodes[j];
+                td.style.width  = canvas.childNodes[0].childNodes[0].childNodes[0].style.width;
+                td.style.height = canvas.childNodes[0].childNodes[0].childNodes[0].style.height;
+            }
+        }
         backgroundCanvas[0].appendChild(background);
-
-        mulimg();
     };
     reader.readAsText(file, /* optional */ "euc-kr");
-
-
 }
 
 //캔버스 파일 열기
-function openTextFile() {
+function backgroundCanvasOpenTextFile() {
     var input = document.createElement("input");
     input.type = "file";
     input.accept = "text/plain"; // 확장자가 xxx, yyy 일때, ".xxx, .yyy"
     input.onchange = function (event) {
-        loadCanvas(event.target.files[0]);
+        backgroundCanvasLoadCanvas(event.target.files[0]);
+    };
+    input.click();
+}
+//캔버스 파일 열기
+function CanvasOpenTextFile() {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "text/plain"; // 확장자가 xxx, yyy 일때, ".xxx, .yyy"
+    input.onchange = function (event) {
+        CanvasLoadCanvas(event.target.files[0]);
     };
     input.click();
 }
@@ -234,24 +260,14 @@ function download(filename, text) {
 }
 //캔버스 세이브
 function canvasSave() {
-    //copyToClipboard("canvas");//이게 밑에있는 카피함수랑 이어지는거에여 자동 복사해주는거!
     var t = prompt("저장할 이름을 입력해 주세요.");
+    if(pvalue!=null){
+        return;
+    }
+    //copyToClipboard("canvas");
     download(t, document.getElementById("canvas").innerHTML);
-    //var data = document.getElementById("canvas").innerHTML;
-
-
+    
 }
-
-//이게 다운로드 함수져?
-// function downloadInnerHtml(elementid, htmllinereplace, filename, mimeType, extension) {
-//     var elHtml = $(elementid).html();
-//     if (htmllinereplace) elHtml = elHtml.replace(/\<br\>/gi, '\n');
-//     var link = document.createElement('a');
-//     link.setAttribute('download', filename + extension);
-//     link.setAttribute('href', 'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(elHtml));
-//     link.click();
-// }
-
 
 function changeColor(obj) { // 팔래트 색 바꾸기
     var parllteColor = document.getElementById("parllteColor");
@@ -294,7 +310,7 @@ function CreateCanvas() { //캔버스 만들기
 
     //다시만들기 확인
     var obj = document.getElementById("create");
-    if (obj.innerHTML === "다시 만들기") {
+    if (obj.innerHTML === '<div>다시 만들기</div><div></div><div>다시 만들기</div>') {
         if (confirm("기존에 있던 캔버스는 삭제됩니다. \n 다시만드시겠습니까?") == true) {
             document.getElementById("canvas").innerHTML = "";
             document.getElementsByClassName("backgroundCanvas")[0].innerHTML = "";
@@ -303,7 +319,7 @@ function CreateCanvas() { //캔버스 만들기
             return;
         }
     } else {
-        obj.innerHTML = "다시 만들기";
+        obj.innerHTML = '<div>다시 만들기</div><div></div><div>다시 만들기</div>';
     }
 
 
@@ -329,39 +345,45 @@ function CreateCanvas() { //캔버스 만들기
             td.style.width = ifBin_w_h + "px";
             td.style.height = ifBin_w_h + "px";
 
-            //마우스 올라왔을때 => 오퍼시티 =0.5
-            td.onmouseover = function () {
-                this.style.opacity = 0.5;
-            };
+            AddEvent(td);
 
-            //마우스가 내려갔을때 => 오퍼시티 = 1
-            td.onmouseout = function () {
-                this.style.opacity = 1;
-            };
-
-            //마우스 클릭하고 움직일때 => 오퍼시티 = 1
-            td.ondrag = function () {
-                this.style.opacity = 1;
-            }
-
-            //클릭하고 움직이는 마우스에 다앗을때 => 컬러 가져오기 =>도트 색 바꾸기 
-            //드래그 중일때 (수정필요)
-            td.ondragover = function () {
-                var color = document.getElementById("parllteColor").value;
-                this.style.backgroundColor = color;
-            };
-
-            //클릭 => 컬러 가져오기 =>도트 색 바꾸기 
-            td.onclick = function () {
-                var color = document.getElementById("parllteColor").value;
-                this.style.backgroundColor = color;
-            }
             child.appendChild(td);
         }
 
     }
 
     canvas.appendChild(table);
+}
+
+function AddEvent(element){
+
+            //마우스 올라왔을때 => 오퍼시티 =0.5
+            element.onmouseover = function () {
+                this.style.opacity = 0.5;
+            };
+
+            //마우스가 내려갔을때 => 오퍼시티 = 1
+            element.onmouseout = function () {
+                this.style.opacity = 1;
+            };
+
+            //마우스 클릭하고 움직일때 => 오퍼시티 = 1
+            element.ondrag = function () {
+                this.style.opacity = 1;
+            }
+
+            //클릭하고 움직이는 마우스에 다앗을때 => 컬러 가져오기 =>도트 색 바꾸기 
+            //드래그 중일때 (수정필요)
+            element.ondragover = function () {
+                var color = document.getElementById("parllteColor").value;
+                this.style.backgroundColor = color;
+            };
+
+            //클릭 => 컬러 가져오기 =>도트 색 바꾸기 
+            element.onclick = function () {
+                var color = document.getElementById("parllteColor").value;
+                this.style.backgroundColor = color;
+            }
 }
 
 function imgload() { //이미지 불러오기
@@ -452,4 +474,13 @@ document.getElementById("parllteColor").onchange = function () { //팔래트 최
 //         //     ul.appendChild(li);
 //         //     ul.setAttribute
 //     }
+// }
+//이게 다운로드 함수져?
+// function downloadInnerHtml(elementid, htmllinereplace, filename, mimeType, extension) {
+//     var elHtml = $(elementid).html();
+//     if (htmllinereplace) elHtml = elHtml.replace(/\<br\>/gi, '\n');
+//     var link = document.createElement('a');
+//     link.setAttribute('download', filename + extension);
+//     link.setAttribute('href', 'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(elHtml));
+//     link.click();
 // }
