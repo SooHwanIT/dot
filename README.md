@@ -26,6 +26,3 @@
 ### 도안(배경) : 캔버스 뒤에 위치해서 색을 칠할수 없고 이미 칠해져있는 다른 캔버스를 불러와서 따라 그릴수 있음
 ![image](https://user-images.githubusercontent.com/32871806/124957953-982ea300-e054-11eb-97fb-ef92a180b87b.png)
 ![image](https://user-images.githubusercontent.com/32871806/124958159-cd3af580-e054-11eb-8d49-2479c598c89c.png)
-
-
-
